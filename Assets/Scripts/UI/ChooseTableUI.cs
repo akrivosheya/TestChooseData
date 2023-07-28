@@ -3,6 +3,8 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
+using CrossInput;
+
 namespace UI
 {
     public class ChooseTableUI : MonoBehaviour
@@ -11,6 +13,8 @@ namespace UI
 
         [SerializeField] private ChoiceUI _choicePrefab;
         [SerializeField] private Button _cancelButtonPrefab;
+        [SerializeField] private Image _selectedChoicePrefab;
+        [SerializeField] private IInput _input;
         [SerializeField] private Vector2 _firstChoicePosition;
         [SerializeField] private Vector2 _cancelButtonPosition;
         [SerializeField] private float _rowsOffset = 30f;
@@ -20,7 +24,42 @@ namespace UI
 
         private List<ChoiceUI> _choices = new List<ChoiceUI>();
         private Button _cancel;
+        private Image _selectedChoice;
+        private int _currentChoiceIndex;
 
+        void OnDestroy()
+        {
+            RemoveListeners();
+        }
+
+        public void OnEnter()
+        {
+            _choices[_currentChoiceIndex].OnClick();
+        }
+
+        public void OnHorizontalInput(int offset)
+        {
+            int newIndex = _currentChoiceIndex + offset;
+            if(newIndex >= 0 && newIndex < _choices.Count)
+            {
+                _currentChoiceIndex = newIndex;
+                var newPosition = _selectedChoice.transform.position;
+                newPosition.x += _columnsOffset;
+                _selectedChoice.transform.position = newPosition;
+            }
+        }
+
+        public void OnVerticalInput(int offset)
+        {
+            int newIndex = _currentChoiceIndex + _rowsCount * offset;
+            if(newIndex >= 0 && newIndex < _choices.Count)
+            {
+                _currentChoiceIndex += newIndex;
+                var newPosition = _selectedChoice.transform.position;
+                newPosition.y += _rowsOffset * offset;
+                _selectedChoice.transform.position = newPosition;
+            }
+        }
 
         public void Activate(List<string> choicesParams, UnityAction<string> onChose)
         {
@@ -42,11 +81,24 @@ namespace UI
                 newChoice.transform.position = newPosition;
                 _choices.Add(newChoice);
             }
+            _currentChoiceIndex = 0;
+
+            _selectedChoice = Instantiate(_selectedChoicePrefab);
+            _selectedChoice.transform.SetParent(transform);
+            _selectedChoice.transform.position = _firstChoicePosition;
 
             _cancel = Instantiate(_cancelButtonPrefab);
             _cancel.onClick.AddListener(OnCancel);
             _cancel.transform.SetParent(transform);
             _cancel.transform.position = _cancelButtonPosition;
+
+            AddListeners();
+        }
+
+        public void Deactivate()
+        {
+            Clear();
+            RemoveListeners();
         }
 
         public void OnCancel()
@@ -54,7 +106,7 @@ namespace UI
             OnCancelEvent.Invoke();
         }
 
-        public void Clear()
+        private void Clear()
         {
             foreach(var choice in _choices)
             {
@@ -62,11 +114,31 @@ namespace UI
             }
 
             _choices.Clear();
+            _currentChoiceIndex = 0;
 
             if(_cancel != null)
             {
                 Destroy(_cancel.gameObject);
             }
+
+            if(_selectedChoice != null)
+            {
+                Destroy(_selectedChoice.gameObject);
+            }
+        }
+
+        private void AddListeners()
+        {
+            _input.OnEnter.AddListener(OnEnter);
+            _input.OnHorizontalInput.AddListener(OnHorizontalInput);
+            _input.OnVerticalInput.AddListener(OnVerticalInput);
+        }
+
+        private void RemoveListeners()
+        {
+            _input.OnEnter.RemoveListener(OnEnter);
+            _input.OnHorizontalInput.RemoveListener(OnHorizontalInput);
+            _input.OnVerticalInput.RemoveListener(OnVerticalInput);
         }
     }
 }
