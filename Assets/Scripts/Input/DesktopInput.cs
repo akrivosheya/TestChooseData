@@ -3,12 +3,8 @@ using UnityEngine.Events;
 
 namespace CrossInput
 {
-    public class DesktopInput : MonoBehaviour, IInput
+    public class DesktopInput : AbstractInput
     {
-        public UnityEvent<int> OnHorizontalInput { get; }
-        public UnityEvent<int> OnVerticalInput { get; }
-        public UnityEvent OnEnter { get; }
-
         [SerializeField] private KeyCode _enterKeyCode;
         [SerializeField] private string _xAxisName = "Horizontal";
         [SerializeField] private string _yAxisName = "Vertical";

@@ -7,7 +7,7 @@ namespace UI
     public class ChoiceUI : MonoBehaviour
     {
         public string Name { get; set; }
-        public UnityEvent<string> OnChose;
+        public UnityEvent<string> OnChose = new UnityEvent<string>();
 
         [SerializeField] private Text _text;
 

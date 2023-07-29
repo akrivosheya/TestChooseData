@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Data
 {
+    [CreateAssetMenu(fileName="DataMasterSO")]
     public class DataMaster : ScriptableObject
     {
         [SerializeField] private string _folder = "Data";

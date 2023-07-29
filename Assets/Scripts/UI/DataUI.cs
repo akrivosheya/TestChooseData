@@ -7,7 +7,7 @@ namespace UI
 {
     public class DataUI : MonoBehaviour
     {
-        public UnityEvent OnCancelEvent;
+        public UnityEvent OnCancelEvent = new UnityEvent();
 
         [SerializeField] private Text _textPrefab;
         [SerializeField] private Image _imagePrefab;
@@ -24,7 +24,7 @@ namespace UI
             var cancel = Instantiate(_cancelButtonPrefab);
             cancel.onClick.AddListener(OnCancel);
             cancel.transform.SetParent(transform);
-            cancel.transform.position = _cancelButtonPosition;
+            cancel.transform.localPosition = _cancelButtonPosition;
 
             _elements.Add(cancel.gameObject);
         }
@@ -33,7 +33,8 @@ namespace UI
         {
             var newText = Instantiate(_textPrefab);
             newText.text = text;
-            ConfigureTransform(newText.transform, position, scale);
+            ConfigureTransform(newText.transform, position, Vector2.one);
+            newText.rectTransform.sizeDelta = scale;
 
             _elements.Add(newText.gameObject);
         }
@@ -54,6 +55,22 @@ namespace UI
             _elements.Add(newImage.gameObject);
         }
 
+        public void AddModel(Vector3 position, Vector3 scale, string modelName)
+        {
+            var model = Resources.Load<GameObject>(modelName);
+            if(model is null)
+            {
+                Debug.LogError("Can't find " + modelName + " model.");
+                return;
+            }
+
+            var element = Instantiate(model);
+            element.transform.localPosition = position;
+            element.transform.localScale = scale;
+
+            _elements.Add(element);
+        }
+
         public void Clear()
         {
             foreach(var element in _elements)
@@ -70,7 +87,7 @@ namespace UI
         private void ConfigureTransform(Transform configuringTransform, Vector2 position, Vector2 scale)
         {
             configuringTransform.SetParent(transform);
-            configuringTransform.position = position;
+            configuringTransform.localPosition = position;
             configuringTransform.localScale = scale;
         }
     }

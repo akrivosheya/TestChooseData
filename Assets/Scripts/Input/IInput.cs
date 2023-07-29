@@ -1,11 +1,12 @@
+using UnityEngine;
 using UnityEngine.Events;
 
 namespace CrossInput
 {
-    public interface IInput
+    public abstract class AbstractInput : MonoBehaviour
     {
-        public UnityEvent<int> OnHorizontalInput { get; }
-        public UnityEvent<int> OnVerticalInput { get; }
-        public UnityEvent OnEnter { get; }
+        public UnityEvent<int> OnHorizontalInput { get; } = new UnityEvent<int>();
+        public UnityEvent<int> OnVerticalInput { get; } = new UnityEvent<int>();
+        public UnityEvent OnEnter { get; } = new UnityEvent();
     }
 }
